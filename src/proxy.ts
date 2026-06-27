@@ -10,7 +10,7 @@ function isAuthRequired(pathname: string): boolean {
   return authRequiredPaths.some((p) => pathname.startsWith(p));
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (!isAuthRequired(pathname)) {
