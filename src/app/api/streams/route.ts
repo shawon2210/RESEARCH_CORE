@@ -1,16 +1,14 @@
-import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { Stream } from "@/lib/models/Stream";
-import { handleApiGet, apiError, OPTIONS as baseOptions } from "@/lib/api-utils";
-
-const fallback: Array<{ streamId: string; node: string; status: string; rate: string; rateMbps: number }> = [];
+import { handleApiGet, OPTIONS as baseOptions } from "@/lib/api-utils";
+import { generateDemoStreams } from "@/lib/demo-data";
 
 export async function GET() {
   return handleApiGet(async () => {
     await connectToDatabase();
     const streams = await Stream.find().sort({ lastActive: -1 }).lean();
-    return streams;
-  }, fallback);
+    return streams.length ? streams : generateDemoStreams();
+  }, generateDemoStreams());
 }
 
 export { baseOptions as OPTIONS };

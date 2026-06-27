@@ -1,21 +1,8 @@
-import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { Stream } from "@/lib/models/Stream";
 import { Node } from "@/lib/models/Node";
-import { handleApiGet, apiError, OPTIONS as baseOptions } from "@/lib/api-utils";
-
-const fallback = {
-  throughput: "0 gb/s",
-  throughputRaw: 0,
-  throughputDelta: "N/A",
-  latency: "--",
-  latencyRaw: 0,
-  latencyDelta: "N/A",
-  nodesOnline: 0,
-  nodesTotal: 0,
-  uptime: "--",
-  uptimePercent: 0,
-};
+import { handleApiGet, OPTIONS as baseOptions } from "@/lib/api-utils";
+import { generateDemoMetrics } from "@/lib/demo-data";
 
 export async function GET() {
   return handleApiGet(async () => {
@@ -24,6 +11,7 @@ export async function GET() {
       Stream.find().lean(),
       Node.find().lean(),
     ]);
+    if (!streams.length || !nodes.length) return generateDemoMetrics();
     const totalRate = streams.reduce(
       (sum: number, s: Record<string, unknown>) => sum + ((s.rateMbps as number) || 0),
       0
@@ -43,7 +31,7 @@ export async function GET() {
       uptime: nodes.length > 0 ? "24d 7h" : "--",
       uptimePercent: nodes.length > 0 ? 99.9 : 0,
     };
-  }, fallback);
+  }, generateDemoMetrics());
 }
 
 export { baseOptions as OPTIONS };

@@ -30,6 +30,7 @@ export function Button({
   size = "default",
   className,
   children,
+  disabled,
   ...props
 }: ButtonProps) {
   return (
@@ -39,11 +40,13 @@ export function Button({
         variantStyles[variant],
         sizeStyles[size],
         size === "default" && "label-ui",
+        disabled && "opacity-50 cursor-not-allowed",
         className,
       )}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.97 }}
+      whileHover={disabled ? {} : { scale: 1.02 }}
+      whileTap={disabled ? {} : { scale: 0.97 }}
       transition={{ type: "spring", stiffness: 400, damping: 17 }}
+      disabled={disabled}
       {...(props as React.ComponentProps<typeof motion.button>)}
     >
       {children}

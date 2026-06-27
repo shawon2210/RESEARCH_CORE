@@ -51,7 +51,7 @@ export function Footer() {
           </div>
           <div className="flex items-center gap-4">
             <a
-              href="https://github.com"
+              href="https://github.com/shawon2210"
               target="_blank"
               rel="noopener noreferrer"
               className="text-text-on-dark opacity-40 hover:opacity-100 hover:text-brand-gold transition-all duration-200"
@@ -60,7 +60,7 @@ export function Footer() {
               <GitHubIcon className="w-5 h-5" />
             </a>
             <a
-              href="https://linkedin.com"
+              href="https://www.linkedin.com/in/shawon2210/"
               target="_blank"
               rel="noopener noreferrer"
               className="text-text-on-dark opacity-40 hover:opacity-100 hover:text-brand-gold transition-all duration-200"

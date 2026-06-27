@@ -101,9 +101,11 @@ export function Navbar() {
             <LinkedInIcon className="w-5 h-5" />
           </a>
           <div className="w-px h-5 bg-white/20 mx-1" />
-          <Button variant="primary" size="sm">
-            AUTHENTICATE
-          </Button>
+          <Link href="/login">
+            <Button variant="primary" size="sm">
+              AUTHENTICATE
+            </Button>
+          </Link>
         </div>
         <button
           className="md:hidden text-text-on-dark material-symbols-outlined"
@@ -133,7 +135,7 @@ export function Navbar() {
           ))}
           <div className="flex items-center gap-4 pt-4 border-t border-white/10">
             <a
-              href="https://github.com"
+            href="https://github.com/shawon2210"
               target="_blank"
               rel="noopener noreferrer"
               className="text-text-on-dark opacity-60 hover:text-brand-gold transition-colors"
@@ -142,7 +144,7 @@ export function Navbar() {
               <GitHubIcon className="w-5 h-5" />
             </a>
             <a
-              href="https://linkedin.com"
+            href="https://www.linkedin.com/in/shawon2210/"
               target="_blank"
               rel="noopener noreferrer"
               className="text-text-on-dark opacity-60 hover:text-brand-gold transition-colors"
@@ -151,9 +153,11 @@ export function Navbar() {
               <LinkedInIcon className="w-5 h-5" />
             </a>
             <div className="ml-auto">
-              <Button variant="primary" size="sm">
-                AUTHENTICATE
-              </Button>
+              <Link href="/login">
+                <Button variant="primary" size="sm">
+                  AUTHENTICATE
+                </Button>
+              </Link>
             </div>
           </div>
         </div>

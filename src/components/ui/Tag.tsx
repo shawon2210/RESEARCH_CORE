@@ -8,9 +8,9 @@ interface TagProps {
 
 const variantStyles: Record<string, string> = {
   gold: "text-brand-gold border-brand-gold",
-  ok: "text-[#4ecdc4] border-[#4ecdc4]",
+  ok: "text-status-ok border-status-ok",
   warn: "text-brand-gold border-brand-gold",
-  err: "text-[#ff6b6b] border-[#ff6b6b]",
+  err: "text-status-err border-status-err",
 };
 
 export function Tag({

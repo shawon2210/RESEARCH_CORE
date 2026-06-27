@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { Table } from "@/components/ui/Table";
@@ -12,6 +12,7 @@ import { MotionSection } from "@/components/animations/MotionSection";
 import { StaggerContainer, StaggerItem } from "@/components/animations/StaggerContainer";
 import { Counter } from "@/components/animations/Counter";
 import type { StreamData, NodeData, ActivityData, MetricsData } from "@/lib/types";
+import { generateDemoMetrics, generateDemoActivity, generateDemoNodes, generateDemoStreams } from "@/lib/demo-data";
 
 const activityColumns = [
   { key: "timestamp", header: "TIMESTAMP" },
@@ -42,10 +43,10 @@ const streamColumns = [
       <span
         className={
           item.status === "ONLINE"
-            ? "text-[#4ecdc4]"
+            ? "text-status-ok"
             : item.status === "DEGRADED"
               ? "text-brand-gold"
-              : "text-[#ff6b6b]"
+              : "text-status-err"
         }
       >
         {item.status}
@@ -77,43 +78,83 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
 
+  async function fetchData() {
+    try {
+      const [mRes, aRes, nRes, sRes] = await Promise.all([
+        fetch("/api/metrics").catch(() => null),
+        fetch("/api/activity").catch(() => null),
+        fetch("/api/nodes").catch(() => null),
+        fetch("/api/streams").catch(() => null),
+      ]);
+
+      if (mRes?.ok) setMetrics(await mRes.json());
+      else setMetrics(generateDemoMetrics());
+
+      if (aRes?.ok) setActivity(await aRes.json());
+      else setActivity(generateDemoActivity());
+
+      if (nRes?.ok) setNodes(await nRes.json());
+      else setNodes(generateDemoNodes());
+
+      if (sRes?.ok) setStreams(await sRes.json());
+      else setStreams(generateDemoStreams());
+
+      setFetchError(false);
+    } catch {
+      setMetrics(generateDemoMetrics());
+      setActivity(generateDemoActivity());
+      setNodes(generateDemoNodes());
+      setStreams(generateDemoStreams());
+      setFetchError(false);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   useEffect(() => {
     let cancelled = false;
+    let pollInterval: ReturnType<typeof setInterval>;
 
-    async function fetchData() {
-      setFetchError(false);
-      try {
-        const [mRes, aRes, nRes, sRes] = await Promise.all([
-          fetch("/api/metrics"),
-          fetch("/api/activity"),
-          fetch("/api/nodes"),
-          fetch("/api/streams"),
-        ]);
-
-        if (cancelled) return;
-
-        if (mRes.ok) setMetrics(await mRes.json());
-        if (aRes.ok) setActivity(await aRes.json());
-        if (nRes.ok) setNodes(await nRes.json());
-        if (sRes.ok) setStreams(await sRes.json());
-      } catch {
-        if (!cancelled) setFetchError(true);
-      } finally {
-        if (!cancelled) setLoading(false);
+    async function init() {
+      await fetchData();
+      if (!cancelled) {
+        pollInterval = setInterval(fetchData, 15000);
       }
     }
 
-    fetchData();
+    init();
 
-    const interval = setInterval(() => {
+    const clockInterval = setInterval(() => {
       setClock(new Date().toTimeString().slice(0, 8));
     }, 1000);
 
     return () => {
       cancelled = true;
-      clearInterval(interval);
+      clearInterval(pollInterval);
+      clearInterval(clockInterval);
     };
   }, []);
+
+  function exportCSV() {
+    const csv = ["streamId,node,status,rate", ...streams.map((s) => `${s.streamId},${s.node},${s.status},${s.rate}`)].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `streams-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function exportJSON() {
+    const blob = new Blob([JSON.stringify({ metrics, nodes, streams, activity }, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `research-core-export-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   if (fetchError && !loading) {
     return (
@@ -124,7 +165,7 @@ export default function DashboardPage() {
             title="CONNECTION LOST"
             description="Unable to reach the monitoring cluster. Stream data may be delayed."
             action={
-              <Button variant="primary" onClick={() => window.location.reload()}>
+              <Button variant="primary" onClick={fetchData}>
                 RECONNECT
               </Button>
             }
@@ -155,11 +196,14 @@ export default function DashboardPage() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, ease: "easeOut", delay: 0.2 }}
             >
-              <Button variant="ghost" size="sm" onClick={() => window.location.reload()}>
-                REFRESH
+              <Button variant="ghost" size="sm" onClick={exportJSON}>
+                EXPORT_JSON
               </Button>
-              <Button variant="primary" size="sm">
-                NEW STREAM
+              <Button variant="ghost" size="sm" onClick={exportCSV}>
+                EXPORT_CSV
+              </Button>
+              <Button variant="primary" size="sm" onClick={fetchData}>
+                REFRESH
               </Button>
             </motion.div>
           </div>
@@ -190,12 +234,12 @@ export default function DashboardPage() {
                 <Card variant="dark" className="card-glow">
                   <div className="flex justify-between items-center mb-2">
                     <span className="label-caps opacity-60">LATENCY</span>
-                    <span className="material-symbols-outlined text-[#4ecdc4] text-[18px]">
+                    <span className="material-symbols-outlined text-status-ok text-[18px]">
                       arrow_downward
                     </span>
                   </div>
                   <Counter value={parseInt(metrics.latency)} suffix="ms" />
-                  <div className="body-mono text-[#4ecdc4] mt-2">
+                  <div className="body-mono text-status-ok mt-2">
                     {metrics.latencyDelta}
                   </div>
                 </Card>
@@ -278,10 +322,10 @@ export default function DashboardPage() {
                           <span
                             className={
                               node.status === "ONLINE"
-                                ? "text-[#4ecdc4]"
+                                ? "text-status-ok"
                                 : node.status === "DEGRADED"
                                   ? "text-brand-gold"
-                                  : "text-[#ff6b6b]"
+                                  : "text-status-err"
                             }
                           >
                             {node.status}

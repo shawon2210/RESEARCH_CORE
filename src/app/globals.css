@@ -86,6 +86,11 @@
   --margin-tablet: 40px;
   --margin-mobile: 20px;
 
+  /* ── Status Colors ── */
+  --color-status-ok: #4ecdc4;
+  --color-status-warn: #DA840A;
+  --color-status-err: #ff6b6b;
+
   /* ── Touch ── */
   --touch-min: 48px;
 }

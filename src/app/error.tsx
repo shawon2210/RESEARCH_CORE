@@ -12,8 +12,8 @@ export default function RootError({
   return (
     <section className="bg-surface-dark py-40 px-[var(--margin-desktop)] max-md:px-[var(--margin-mobile)] min-h-screen flex items-center">
       <div className="max-w-[var(--max-width)] mx-auto w-full">
-        <div className="border-t border-[#ff6b6b] pt-4 max-w-xl">
-          <p className="body-mono text-[#ff6b6b] mb-4 tracking-[0.1em]">
+        <div className="border-t border-status-err pt-4 max-w-xl">
+          <p className="body-mono text-status-err mb-4 tracking-[0.1em]">
             CRITICAL // SYSTEM EXCEPTION
           </p>
           <h1 className="heading-lg text-text-on-dark mb-4">
@@ -21,7 +21,7 @@ export default function RootError({
           </h1>
           <p className="body-mono text-text-on-dark opacity-60 mb-8 leading-relaxed max-w-md">
             The system encountered an unrecoverable error. Diagnostic code:{" "}
-            <span className="opacity-100 text-[#ff6b6b]">
+            <span className="opacity-100 text-status-err">
               {error.digest ?? "N/A"}
             </span>
           </p>

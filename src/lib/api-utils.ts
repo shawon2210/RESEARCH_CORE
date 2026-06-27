@@ -28,7 +28,10 @@ export async function handleApiGet<T>(
   try {
     const data = await fetcher();
     return apiSuccess(data);
-  } catch {
+  } catch (err) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("[API] Fallback triggered:", err instanceof Error ? err.message : err);
+    }
     return apiSuccess(fallback);
   }
 }
